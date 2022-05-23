@@ -5,8 +5,6 @@
 #include <sys/time.h>
 #include <time.h>
 
-
-
 #define ERROR 0
 #define SUCCESS 1
 
@@ -75,7 +73,6 @@ TREE* getNodeTypeless(TREE *currentFolder, char* name) {
         res = strcmp(name, currentNode->name);
         if (!res)  return currentNode;
         else return NULL;
-
     } 
     else return NULL;
 }
@@ -123,12 +120,23 @@ int mkdir(TREE *currfolder, char *new) {
                 return ERROR;
 
             strcpy(newFolderName, new);
-
             newfolder = set(newfolder, newFolderName);
 
         } else 
             printf("'%s' is already exist in current directory!\n",  new);
     }
+}
+
+TREE* createFile(TREE* newFile, char* newFileName) {
+    newFile->name = newFileName;
+    newFile->type = 1;
+    newFile->numberOfItems = 0;
+    newFile->size = 0;
+    newFile->content = NULL;
+    newFile->next = NULL;
+    newFile->child = NULL;
+
+    return newFile;
 }
 
 void touch(TREE *currentFolder, char *name) {
@@ -158,20 +166,12 @@ void touch(TREE *currentFolder, char *name) {
             char* newFileName = (char*) malloc(sizeof(char));
             strcpy(newFileName, name);
 
-            newFile->name = newFileName;
-            newFile->type = 1;
-            newFile->numberOfItems = 0;
-            newFile->size = 0;
-            newFile->content = NULL;
-            newFile->next = NULL;
-            newFile->child = NULL;
+            newFile = createFile(newFile, newFileName);
 
-            printf("File '%s' added\n", newFile->name);
         } else {
-            fprintf(stderr, "'%s' is already exist in current directory!\n", name);
+            printf("'%s' is already exist in current directory!\n", name);
         }
     }
-    
 }
 
 void ls(TREE *currentFolder) {
@@ -190,7 +190,6 @@ void ls(TREE *currentFolder) {
             printf("(D) %s %d items\n", currentNode->name, currentNode->numberOfItems);
         else 
             printf("(F) %s\n", currentNode->name);
-
     }
 }
 
@@ -205,7 +204,6 @@ void pwd(char *path) {
 
     while(*pointer != '\0') 
         printf("%c", *pointer++);
-    
 }
 
 
@@ -236,7 +234,6 @@ TREE* cd(TREE *currentFolder, char *folder, char **path) {
 }
 
 TREE* cdup(TREE *currentFolder, char **path) {
-
     size_t newPathLength = strlen(*path) - strlen(currentFolder->name);
 
     while (currentFolder->previous != NULL) {
@@ -363,54 +360,30 @@ char *removeLineBreak(char *string) {
 
 int rmdir(TREE *curr, char *str) {
     if (str) {
-            TREE *removingNode = getNodeTypeless(curr, str);
-            if(removingNode->type == FOLDER) {
-                if (removingNode) {
-                    printf("Do you really want to remove %s and all of its content? (y/n)\n", removingNode->name);
-
-                    char *answer = getString();
-                    answer = removeLineBreak(answer);
-
-                    if (!strcmp(answer, "y")) {
-                        curr->numberOfItems--;
-                        removeNode(removingNode);
-                        printf("%s and its all content is removed!\n", removingNode->name);
-                        freeNode(removingNode);
-                    }
-                    free(answer);
-                } else {
-                    printf("'%s' is not exist in current directory!\n",  str);
-                }
-            } else {
-                printf("it's not a folder!\n");
-                return ERROR;
-        }
-    }   
-}
+        TREE *removingNode = getNodeTypeless(curr, str);
+        if(removingNode->type == FOLDER) {
+            if (removingNode) {
+                curr->numberOfItems--;
+                removeNode(removingNode);
+                freeNode(removingNode);
+            }   
+        } else 
+            printf("'%s' is not exist in current directory!\n",  str);
+        } else 
+            printf("it's not a folder!\n");
+}   
 
 int rm(TREE *curr, char *str) {
      if (str) {
         TREE *removingNode = getNodeTypeless(curr, str);
         if(removingNode->type == FILE_) {
             if (removingNode) {
-                printf("Do you really want to remove %s and all of its content? (y/n)\n", removingNode->name);
-
-                char *answer = getString();
-                answer = removeLineBreak(answer);
-
-                if (!strcmp(answer, "y")) {
-                    removeNode(removingNode);
-                    printf("%s and its all content is removed!\n", removingNode->name);
-                    freeNode(removingNode);
-                }
-                free(answer);
-            } else {
+                removeNode(removingNode);
+                freeNode(removingNode);
+            } else 
                 printf("'%s' is not exist in current directory!\n",  str);
-            }
-        } else {
+        } else 
             printf("it's not a file!\n");
-            return ERROR;
-        }
     }   
 }
 
