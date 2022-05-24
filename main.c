@@ -234,14 +234,14 @@ TREE* cd(TREE *currentFolder, char *folder, char **path) {
 }
 
 TREE* cdup(TREE *currentFolder, char **path) {
-    size_t newPathLength = strlen(*path) - strlen(currentFolder->name);
+    int newPathLength = strlen(*path) - strlen(currentFolder->name);
 
     while (currentFolder->previous != NULL) {
         currentFolder = currentFolder->previous;
     }
     if (currentFolder->parent != NULL ) {
 
-        *path = (char *) realloc(*path, sizeof(char)* newPathLength);
+        *path = (char *) realloc(*path, sizeof(char) * newPathLength * 50);
         (*path)[newPathLength-1] = '\0';
 
         currentFolder = currentFolder->parent;
@@ -289,56 +289,6 @@ void removeNode(TREE *removingNode) {
 }
 
 
-void moveNode(TREE *movingNode, TREE *destinationFolder) {
-
-    if (destinationFolder->child == NULL) {
-        destinationFolder->child = movingNode;
-        movingNode->previous = NULL;
-        movingNode->parent = destinationFolder;
-        movingNode->next = NULL;
-    } else {
-        TREE *currentNode = destinationFolder->child;
-        while (currentNode->next != NULL) {
-            currentNode = currentNode->next;
-        }
-
-        currentNode->next = movingNode;
-        movingNode->previous = currentNode;
-        movingNode->parent = NULL;
-        movingNode->next = NULL;
-    }
-    destinationFolder->numberOfItems++;
-}
-
-void mov(TREE *currentFolder, char *command) {
-
-    char* nodeName;
-    char* destinationName;
-
-    if (strtok(command, " ") != NULL) {
-        nodeName = strtok(NULL, " ");
-        if (nodeName != NULL) {
-            destinationName = strtok(NULL, " ");
-            if (destinationName != NULL) {
-                if (strtok(NULL, " ")) {
-                    return;
-                } else {
-
-                    TREE* movingNode = getNodeTypeless(currentFolder, nodeName);
-                    TREE* destinationFolder = getNode(currentFolder, destinationName, FOLDER);
-
-                    if (destinationFolder != NULL && movingNode != NULL && destinationFolder != movingNode) {
-
-                        removeNode(movingNode);
-                        moveNode(movingNode, destinationFolder);
-                    } else {
-                        fprintf(stderr, "Something you made wrong!\n");
-                    }
-                }
-            }
-        }
-    }
-}
 
 char *splitString(char *string) {
     char delim[] = " ";
@@ -487,11 +437,8 @@ void reset() {
     printf("\033[0m");
 }
 
-int verifyString() {
-    TREE *root = rootCreate(); 
+int verifyString(TREE* currentFolder,TREE *root ,char *path) {
     char a[100];
-    TREE *currentFolder = root;
-    char *path = (char *) malloc(sizeof(a));
     char *newFolder = (char *) malloc(sizeof(a));
     char *newname = (char *) malloc(sizeof(a));
     char *newnameAUX = (char *) malloc(sizeof(a));
@@ -503,7 +450,7 @@ int verifyString() {
     if(!path || !newFolder || !newFolder || !command)
         return ERROR;
 
-    strcpy(path, "/");
+    //strcpy(path, "/");
 
     while (true) {
         green();
@@ -584,9 +531,6 @@ int verifyString() {
         else if (!strcmp(command, "clear")) 
             clearScreen();
 
-        else if (!strcmp(command, "mov")) 
-            mov(currentFolder, command);
-
         else if (!strcmp(command, "help")) 
             menu();
 
@@ -600,7 +544,29 @@ int verifyString() {
 }
 
 int main() {
-    verifyString();
-
-    return 0;
+    TREE *root = rootCreate();
+    TREE *curr = root;
+    char *path = (char*)malloc(sizeof(char));
+    strcpy(path, "/");
+    mkdir(curr, "Arquivos-e-Programas");
+    curr = cd(curr, "Arquivos-e-Programas", &path);
+    touch(curr, "Firefox");
+    touch(curr, "Chrome");
+    touch(curr, "Opera");
+    curr = cdup(curr, &path);
+    mkdir(curr, "Meus-Documentos");
+    curr = cd(curr, "Meus-Documentos", &path);
+    touch(curr, "apresentacao.ppt");
+    touch(curr, "relatorio.doc");
+    mkdir(curr, "fontes");
+    curr = cd(curr, "fontes", &path);
+    touch(curr, "main.c");
+    touch(curr, "main.h");
+    curr = cdup(curr, &path);
+    mkdir(curr, "imagens");
+    touch(curr, "7zip.exe");
+    touch(curr, "t2.rar");
+    curr = cdup(curr, &path);
+    verifyString(curr, root, path);
+    return SUCCESS;
 }
