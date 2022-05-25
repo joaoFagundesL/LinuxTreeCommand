@@ -2,23 +2,18 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <sys/time.h>
-#include <time.h>
 
 #define ERROR 0
 #define SUCCESS 1
 
 typedef struct TREE{
-    char* name;
-    int numberOfItems;
-    short type;
-    size_t size;
-    time_t date;
-    char* content;
-    struct TREE* previous;
-    struct TREE* parent;
-    struct TREE* next;
     struct TREE* child;
+    struct TREE* previous;
+    struct TREE* next;
+    struct TREE* parent;
+    char* name;
+    short quantity;
+    short type;
 }TREE;
 
 const short FOLDER = 2;
@@ -27,51 +22,40 @@ const short FILE_ = 1;
 char *getString(){
     char *str;
     char a[100];
- 
     str = (char*) malloc(sizeof(a));
-    if(!str) 
-        return ERROR;
-    else 
-        fgets(str, 100, stdin);
-    
+    if(!str) return ERROR;
+    else fgets(str, 100, stdin);
     return str;
 }
 
-TREE* getNode(TREE *currentFolder, char* name, short type) {
+TREE* getnodetype(TREE *currfolder, char* name, short type) {
+    if (currfolder->child) {
+        TREE *currnode = currfolder->child;
 
-    if (currentFolder->child != NULL) {
-
-        TREE *currentNode = currentFolder->child;
-
-        while (currentNode->next != NULL) {
-
-            if (strcmp(name, currentNode->name) == 0 && currentNode->type == type) {
-                return currentNode;
-            }
-            currentNode = currentNode->next;
+        while (currnode->next) {
+            if (strcmp(name, currnode->name) == 0 && currnode->type == type) return currnode;
+            currnode = currnode->next;
         }
 
-        if (strcmp(name, currentNode->name) == 0 && currentNode->type == type) {
-            return currentNode;
-        } else return NULL;
-
+        if (strcmp(name, currnode->name) == 0 && currnode->type == type) 
+            return currnode;
+        else return NULL;
     } else return NULL;
 }
 
-TREE* getNodeTypeless(TREE *currentFolder, char* name) {
-    if (currentFolder->child) {
-        TREE *currentNode = currentFolder->child;
+TREE* getnode(TREE *currfolder, char* name) {
+    if (currfolder->child) {
+        TREE *currnode = currfolder->child;
 
-        int res = strcmp(name, currentNode->name);
+        int res = strcmp(name, currnode->name);
 
-        while (currentNode->next) {
-            if (!res) 
-                return currentNode;
-            currentNode = currentNode->next;
+        while (currnode->next) {
+            if (!res) return currnode;
+            currnode = currnode->next;
         }
 
-        res = strcmp(name, currentNode->name);
-        if (!res)  return currentNode;
+        res = strcmp(name, currnode->name);
+        if (!res)  return currnode;
         else return NULL;
     } 
     else return NULL;
@@ -80,9 +64,7 @@ TREE* getNodeTypeless(TREE *currentFolder, char* name) {
 TREE* set(TREE* newFolder, char *newFolderName) {
     newFolder->name = newFolderName;
     newFolder->type = FOLDER;
-    newFolder->numberOfItems = 0;
-    newFolder->size = 0;
-    newFolder->content = NULL;
+    newFolder->quantity = 0;
     newFolder->next = NULL;
     newFolder->child = NULL;
 
@@ -91,34 +73,29 @@ TREE* set(TREE* newFolder, char *newFolderName) {
 
 int mkdir(TREE *currfolder, char *new) {
     if (new) {
-        if (!getNodeTypeless(currfolder, new)) {
-            currfolder->numberOfItems++;
-
+        if (!getnode(currfolder, new)) {
+            currfolder->quantity++;
             TREE *newfolder = (TREE*) malloc(sizeof(TREE));
-            if (!newfolder)
-                return ERROR;
+            if (!newfolder) return ERROR;
 
             if (!currfolder->child) {
                 currfolder->child = newfolder;
                 newfolder->previous = NULL;
                 newfolder->parent = currfolder;
             } else {
-                TREE *currentNode = currfolder->child;
+                TREE *currnode = currfolder->child;
 
-                while (currentNode->next) 
-                    currentNode = currentNode->next;
+                while (currnode->next) 
+                    currnode = currnode->next;
         
-                currentNode->next = newfolder;
-                newfolder->previous = currentNode;
+                currnode->next = newfolder;
+                newfolder->previous = currnode;
                 newfolder->parent = NULL;
             }
 
             int len = strlen(new);
             char* newFolderName = (char*) malloc(sizeof(char) * len);
-
-            if (!newFolderName)
-                return ERROR;
-
+            if (!newFolderName) return ERROR;
             strcpy(newFolderName, new);
             newfolder = set(newfolder, newFolderName);
 
@@ -129,37 +106,37 @@ int mkdir(TREE *currfolder, char *new) {
 
 TREE* createFile(TREE* newFile, char* newFileName) {
     newFile->name = newFileName;
-    newFile->type = 1;
-    newFile->numberOfItems = 0;
-    newFile->size = 0;
-    newFile->content = NULL;
+    newFile->type = FILE_;
+    newFile->quantity = 0;
     newFile->next = NULL;
     newFile->child = NULL;
 
     return newFile;
 }
 
-void touch(TREE *currentFolder, char *name) {
+int touch(TREE *currfolder, char *name) {
     if (name) {
-        if (!getNodeTypeless(currentFolder, name)) {
+        TREE *currnode;
+        if (!getnode(currfolder, name)) {
 
-            currentFolder->numberOfItems++;
-
+            currfolder->quantity++;
             TREE *newFile = (TREE *) malloc(sizeof(TREE));
 
-            if (!currentFolder->child) {
-                currentFolder->child = newFile;
+            if(!newFile)
+                return ERROR;
+
+            if (!currfolder->child) {
+                currfolder->child = newFile;
                 newFile->previous = NULL;
-                newFile->parent = currentFolder;
+                newFile->parent = currfolder;
             } else {
+                currnode = currfolder->child;
 
-                TREE *currentNode = currentFolder->child;
-
-                while (currentNode->next) {
-                    currentNode = currentNode->next;
-                }
-                currentNode->next = newFile;
-                newFile->previous = currentNode;
+                while (currnode->next) 
+                    currnode = currnode->next;
+                
+                currnode->next = newFile;
+                newFile->previous = currnode;
                 newFile->parent = NULL;
             }
 
@@ -168,35 +145,24 @@ void touch(TREE *currentFolder, char *name) {
 
             newFile = createFile(newFile, newFileName);
 
-        } else {
+        } else 
             printf("'%s' is already exist in current directory!\n", name);
-        }
     }
 }
 
-void ls(TREE *currentFolder) {
-    if (currentFolder->child == NULL) printf("empty\n");
+void ls(TREE *currfolder) {
+    if (currfolder->child == NULL) printf("empty\n");
     else {
-        TREE *currentNode = currentFolder->child;
+        TREE *currnode = currfolder->child;
 
-        while (currentNode->next) {
-            if (currentNode->type == FOLDER) printf("(D) %s %d items\n", currentNode->name, currentNode->numberOfItems);
-            else printf("(F) %s\n", currentNode->name);
-            
-            currentNode = currentNode->next;
+        while (currnode->next) {
+            if (currnode->type == FOLDER) printf("(D) %s %d items\n", currnode->name, currnode->quantity);
+            else printf("(F) %s\n", currnode->name);
+            currnode = currnode->next;
         }
-        
-        if (currentNode->type == FOLDER) 
-            printf("(D) %s %d items\n", currentNode->name, currentNode->numberOfItems);
-        else 
-            printf("(F) %s\n", currentNode->name);
+        currnode->type == FOLDER ? printf("(D) %s %d items\n", currnode->name, currnode->quantity) :  printf("(F) %s\n", currnode->name);
     }
 }
-
-int lsrecursive(TREE *currentFolder, char *str ,int indentCount) {
-    //todo    
-}
-
 
 void pwd(char *path) {
     char *pointer;
@@ -206,8 +172,7 @@ void pwd(char *path) {
         printf("%c", *pointer++);
 }
 
-
-TREE* cd(TREE *currentFolder, char *folder, char **path) {
+TREE* cd(TREE *currfolder, char *folder, char **path) {
     char *slash;
     slash = (char *)malloc(sizeof(char));
     strcpy(slash, "/");
@@ -216,7 +181,7 @@ TREE* cd(TREE *currentFolder, char *folder, char **path) {
         return ERROR;
 
     if (folder) {
-        TREE *destinationFolder = getNode(currentFolder, folder, FOLDER);
+        TREE *destinationFolder = getnodetype(currfolder, folder, FOLDER);
 
         if (destinationFolder) {
             strcat(*path, destinationFolder->name);
@@ -224,71 +189,61 @@ TREE* cd(TREE *currentFolder, char *folder, char **path) {
             return destinationFolder;
         } else {
             printf("'%s' doesn't exist\n", folder);
-            return currentFolder;
+            return currfolder;
         }
     } else 
-        return currentFolder;
+        return currfolder;
         
-    return currentFolder;
+    return currfolder;
     
 }
 
-TREE* cdup(TREE *currentFolder, char **path) {
-    int newPathLength = strlen(*path) - strlen(currentFolder->name);
+TREE* cdprevious(TREE *currfolder, char **path) {
+    int pathlen = strlen(*path);
+    int namelen =strlen(currfolder->name);
+    int len = pathlen - namelen;
 
-    while (currentFolder->previous != NULL) {
-        currentFolder = currentFolder->previous;
-    }
-    if (currentFolder->parent != NULL ) {
-
-        *path = (char *) realloc(*path, sizeof(char) * newPathLength * 50);
-        (*path)[newPathLength-1] = '\0';
-
-        currentFolder = currentFolder->parent;
-        return currentFolder;
-    } else {
-        return currentFolder;
-    }
+    while (currfolder->previous) 
+        currfolder = currfolder->previous;
+        
+    if (currfolder->parent) {(*path)[--len] = '\0';return currfolder->parent;}
+    else return currfolder;
 }
 
 void freeNode(TREE *freeingNode) {
+    TREE *currnode;
+    TREE *nextNode;
+
     if (freeingNode->child) {
-
-        TREE* currentNode = freeingNode->child;
-
-        while (currentNode->next) {
-            TREE* nextNode = currentNode->next;
-            freeNode(currentNode);
-            currentNode = nextNode;
+        currnode = freeingNode->child;
+        while (currnode->next) {
+            nextNode = currnode->next;
+            freeNode(currnode);
+            currnode = nextNode;
         }
-        freeNode(currentNode);
+        freeNode(currnode);
     }
     free(freeingNode->name);
-    free(freeingNode->content);
     free(freeingNode);
-
 }
 
 void removeNode(TREE *removingNode) {
-    if (removingNode->parent != NULL){
-        if (removingNode->next != NULL) {
+    if (removingNode->parent){
+        if (removingNode->next) {
             removingNode->next->parent = removingNode->parent;
             removingNode->parent->child = removingNode->next;
             removingNode->next->previous = NULL;
-        } else {
+        } else 
             removingNode->parent->child = NULL;
-        }
     } else {
-        if (removingNode->next != NULL) {
+        if (removingNode->next) {
             removingNode->previous->next = removingNode->next;
             removingNode->next->previous  = removingNode->previous;
-        } else {
+        } else 
             removingNode->previous->next = NULL;
-        }
+        
     }
 }
-
-
 
 char *splitString(char *string) {
     char delim[] = " ";
@@ -310,30 +265,26 @@ char *removeLineBreak(char *string) {
 
 int rmdir(TREE *curr, char *str) {
     if (str) {
-        TREE *removingNode = getNodeTypeless(curr, str);
+        TREE *removingNode = getnode(curr, str);
         if(removingNode->type == FOLDER) {
             if (removingNode) {
-                curr->numberOfItems--;
+                curr->quantity--;
                 removeNode(removingNode);
                 freeNode(removingNode);
             }   
-        } else 
-            printf("'%s' is not exist in current directory!\n",  str);
-        } else 
-            printf("it's not a folder!\n");
+        } else printf("'%s' is not exist!\n",  str);
+    } else printf("it's not a folder!\n");
 }   
 
 int rm(TREE *curr, char *str) {
      if (str) {
-        TREE *removingNode = getNodeTypeless(curr, str);
+        TREE *removingNode = getnode(curr, str);
         if(removingNode->type == FILE_) {
             if (removingNode) {
                 removeNode(removingNode);
                 freeNode(removingNode);
-            } else 
-                printf("'%s' is not exist in current directory!\n",  str);
-        } else 
-            printf("it's not a file!\n");
+            } else  printf("'%s' is not exist\n",  str);
+        } else printf("it's not a file!\n");
     }   
 }
 
@@ -355,9 +306,7 @@ TREE *rootCreate() {
     
     root->type = FOLDER;
     root->name = name;
-    root->numberOfItems = 0;
-    root->size = 0;
-    root->content =NULL;
+    root->quantity = 0;
     root->previous = NULL;
     root->parent = NULL;
     root->next = NULL;
@@ -388,41 +337,31 @@ void clearScreen() {
 }
 
 int renamedir(TREE* curr, char* name, char* newname) {
-    TREE *node = getNodeTypeless(curr, name);
-
+    TREE *node = getnode(curr, name);
     int len = strlen(name);
-
-    if(!len)
-        return ERROR;
+    if(!len) return ERROR;
     
     if(!node) {
         puts("something went wrong");
         return ERROR;
     }
 
-    if(node->type == FOLDER) 
-        strcpy(node->name, newname);
-    else 
-        puts("it's not a folder");
+    if(node->type == FOLDER) strcpy(node->name, newname);
+    else puts("it's not a folder");
 }
 
 int renamefile(TREE* curr, char* name, char* newname) {
-    TREE *node = getNodeTypeless(curr, name);
-
+    TREE *node = getnode(curr, name);
     int len = strlen(name);
-
-    if(!len)
-        return ERROR;
+    if(!len) return ERROR;
     
     if(!node) {
         puts("something went wrong");
         return ERROR;
     }
 
-    if(node->type == FILE_) 
-        strcpy(node->name, newname);
-    else 
-        puts("it's not a file");
+    if(node->type == FILE_) strcpy(node->name, newname);
+    else puts("it's not a file");
 }
 
 void green() {
@@ -437,7 +376,7 @@ void reset() {
     printf("\033[0m");
 }
 
-int verifyString(TREE* currentFolder,TREE *root ,char *path) {
+int verifyString(TREE* currfolder,TREE *root ,char *path) {
     char a[100];
     char *newFolder = (char *) malloc(sizeof(a));
     char *newname = (char *) malloc(sizeof(a));
@@ -449,8 +388,6 @@ int verifyString(TREE* currentFolder,TREE *root ,char *path) {
 
     if(!path || !newFolder || !newFolder || !command)
         return ERROR;
-
-    //strcpy(path, "/");
 
     while (true) {
         green();
@@ -494,16 +431,13 @@ int verifyString(TREE* currentFolder,TREE *root ,char *path) {
         command = removeLineBreak(command);
 
         if (!strcmp(command, "mkdir")) 
-            mkdir(currentFolder, newFolder);
+            mkdir(currfolder, newFolder);
 
         else if (!strcmp(command, "touch")) 
-            touch(currentFolder, newFolder);
+            touch(currfolder, newFolder);
 
         else if (!strcmp(command, "ls")) 
-            ls(currentFolder);
-
-        else if (!strcmp(command, "search")) 
-            lsrecursive(currentFolder, newFolder ,0);
+            ls(currfolder);
 
         else if (!strcmp(command, "pwd")) {
             pwd(path);
@@ -511,22 +445,22 @@ int verifyString(TREE* currentFolder,TREE *root ,char *path) {
         }
 
         else if (!strcmp(command, "cd..")) 
-            currentFolder = cdup(currentFolder, &path);
+            currfolder = cdprevious(currfolder, &path);
         
         else if (!strcmp(command, "renamedir")) 
-            renamedir(currentFolder, newFolder, newname);
+            renamedir(currfolder, newFolder, newname);
 
         else if (!strcmp(command, "renamefile")) 
-            renamefile(currentFolder, newFolder, newname);
+            renamefile(currfolder, newFolder, newname);
 
         else if (!strcmp(command, "cd"))
-            currentFolder = cd(currentFolder, newFolder, &path);
+            currfolder = cd(currfolder, newFolder, &path);
 
         else if (!strcmp(command, "rmdir")) 
-            rmdir(currentFolder, newFolder);
+            rmdir(currfolder, newFolder);
 
         else if (!strcmp(command, "rm")) 
-            rm(currentFolder, newFolder);
+            rm(currfolder, newFolder);
 
         else if (!strcmp(command, "clear")) 
             clearScreen();
@@ -545,15 +479,16 @@ int verifyString(TREE* currentFolder,TREE *root ,char *path) {
 
 int main() {
     TREE *root = rootCreate();
+    char a[100];
     TREE *curr = root;
-    char *path = (char*)malloc(sizeof(char));
+    char *path = (char*)malloc(sizeof(a));
     strcpy(path, "/");
     mkdir(curr, "Arquivos-e-Programas");
     curr = cd(curr, "Arquivos-e-Programas", &path);
     touch(curr, "Firefox");
     touch(curr, "Chrome");
     touch(curr, "Opera");
-    curr = cdup(curr, &path);
+    curr = cdprevious(curr, &path);
     mkdir(curr, "Meus-Documentos");
     curr = cd(curr, "Meus-Documentos", &path);
     touch(curr, "apresentacao.ppt");
@@ -562,11 +497,11 @@ int main() {
     curr = cd(curr, "fontes", &path);
     touch(curr, "main.c");
     touch(curr, "main.h");
-    curr = cdup(curr, &path);
+    curr = cdprevious(curr, &path);
     mkdir(curr, "imagens");
     touch(curr, "7zip.exe");
     touch(curr, "t2.rar");
-    curr = cdup(curr, &path);
+    curr = cdprevious(curr, &path);
     verifyString(curr, root, path);
     return SUCCESS;
 }
