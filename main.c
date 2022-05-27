@@ -6,25 +6,25 @@
 
 #include <stdlib.h>
 
-#define ERROR 0
-#define SUCCESS 1
+#define ERROR 0 
+#define SUCCESS 1 
 
-typedef struct TREE {
-  struct TREE * child;
-  struct TREE * previous;
-  struct TREE * next;
-  struct TREE * parent;
+typedef struct TREE { 
+  struct TREE * child; // pointer to the child
+  struct TREE * previous; // pointer to the previous
+  struct TREE * next; // pointer to the next
+  struct TREE * parent; // pointer to the parent
 
-  char * name;
-  short quantity;
-  short type;
+  char * name; // name of the node
+  short quantity; // quantity of the node
+  short type; // type of the node
 }
-TREE;
+TREE; 
 
-const short FOLDER = 2;
+const short FOLDER = 2; 
 const short FILE_ = 1;
 
-char * getString() {
+char * getString() { // get string from the user
   char * str;
   char a[100];
 
@@ -71,7 +71,7 @@ TREE * getnode(TREE * currfolder, char * name) {
   } else return NULL;
 }
 
-TREE * set(TREE * newFolder, char * newFolderName) {
+TREE * set(TREE * newFolder, char * newFolderName) { // set new folder
   newFolder -> name = newFolderName;
   newFolder -> type = FOLDER;
   newFolder -> quantity = 0;
@@ -114,7 +114,7 @@ int mkdir(TREE * currfolder, char * new) {
   }
 }
 
-TREE * createFile(TREE * newFile, char * newFileName) {
+TREE * createFile(TREE * newFile, char * newFileName) { // create new file
   newFile -> name = newFileName;
   newFile -> type = FILE_;
   newFile -> quantity = 0;
@@ -160,7 +160,7 @@ int touch(TREE * currfolder, char * name) {
   }
 }
 
-void ls(TREE * currfolder) {
+void ls(TREE * currfolder) { // list all files and folders
   if (currfolder -> child == NULL) printf("empty\n");
   else {
     TREE * currnode = currfolder -> child;
@@ -174,7 +174,7 @@ void ls(TREE * currfolder) {
   }
 }
 
-void pwd(char * path) {
+void pwd(char * path) { // print current path
   char * pointer;
   pointer = path;
 
@@ -257,7 +257,7 @@ void removeNode(TREE * removingNode) {
   }
 }
 
-char * splitString(char * string) {
+char * splitString(char * string) { // split string by ' '
   char delim[] = " ";
 
   string = strtok(string, delim);
@@ -267,7 +267,7 @@ char * splitString(char * string) {
   return string;
 }
 
-char * removeLineBreak(char * string) {
+char * removeLineBreak(char * string) { 
   int len = strlen(string);
 
   string[len - 1] == '\n' ? string[len - 1] = '\0' : string[len - 1];
@@ -275,28 +275,28 @@ char * removeLineBreak(char * string) {
   return string;
 }
 
-int rmdir(TREE * curr, char * str) {
+int rmdir(TREE * curr, char * str) {  // remove directory
   if (str) {
     TREE * removingNode = getnode(curr, str);
-    if (removingNode -> type == FOLDER) {
+    if (removingNode -> type == FOLDER) { // if removingNode is folder
       if (removingNode) {
         curr -> quantity--;
         removeNode(removingNode);
         freeNode(removingNode);
       }
     } else printf("'%s' is not exist!\n", str);
-  } else printf("it's not a folder!\n");
+  } else printf("it's not a folder!\n");  // if removingNode is file
 }
 
-int rm(TREE * curr, char * str) {
+int rm(TREE * curr, char * str) { //remove file
   if (str) {
-    TREE * removingNode = getnode(curr, str);
-    if (removingNode -> type == FILE_) {
+    TREE * removingNode = getnode(curr, str); 
+    if (removingNode -> type == FILE_) {  //if file
       if (removingNode) {
         removeNode(removingNode);
         freeNode(removingNode);
       } else printf("'%s' is not exist\n", str);
-    } else printf("it's not a file!\n");
+    } else printf("it's not a file!\n"); //if folder
   }
 }
 
@@ -306,7 +306,7 @@ int exitProgram(char * command, TREE * root, char * path) {
   free(path);
 }
 
-TREE * rootCreate() {
+TREE * rootCreate() { 
   TREE * root = (TREE * ) malloc(sizeof(TREE));
   char * name = (char * ) malloc(sizeof(char));
 
@@ -316,19 +316,19 @@ TREE * rootCreate() {
   if (!name)
     return ERROR;
 
-  root -> type = FOLDER;
+  root -> type = FOLDER; // root is always folder
   root -> name = name;
   root -> quantity = 0;
-  root -> previous = NULL;
-  root -> parent = NULL;
-  root -> next = NULL;
+  root -> previous = NULL; 
+  root -> parent = NULL; 
+  root -> next = NULL; 
   root -> child = NULL;
-  strcpy(name, "/");
+  strcpy(name, "/"); // root name is always '/'
 
   return root;
 }
 
-void menu() {
+void menu() { 
   puts("mkdir -arg\tcreate directory");
   puts("rmdir -arg\tdelete directory");
   puts("touch -arg\tcreate a file");
@@ -348,7 +348,7 @@ void clearScreen() {
   printf("\e[1;1H\e[2J");
 }
 
-int renamedir(TREE * curr, char * name, char * newname) {
+int renamedir(TREE * curr, char * name, char * newname) { //rename a directory
   TREE * node = getnode(curr, name);
   int len = strlen(name);
   if (!len) return ERROR;
@@ -362,7 +362,7 @@ int renamedir(TREE * curr, char * name, char * newname) {
   else puts("it's not a folder");
 }
 
-int renamefile(TREE * curr, char * name, char * newname) {
+int renamefile(TREE * curr, char * name, char * newname) { //rename a file
   TREE * node = getnode(curr, name);
   int len = strlen(name);
   if (!len) return ERROR;
@@ -376,15 +376,15 @@ int renamefile(TREE * curr, char * name, char * newname) {
   else puts("it's not a file");
 }
 
-void green() {
+void green() { //green color
   printf("\033[0;32m");
 }
 
-void blue() {
+void blue() { //blue color
   printf("\033[0;34m");
 }
 
-void reset() {
+void reset() { //reset color
   printf("\033[0m");
 }
 
@@ -398,8 +398,8 @@ int verifyString(TREE * currfolder, TREE * root, char * path) {
   int auxname;
   bool aux;
 
-  if (!path || !newFolder || !newFolder || !command)
-    return ERROR;
+  if (!path || !newFolder || !newFolder || !command) 
+    return ERROR; 
 
   while (true) {
     green();
@@ -416,7 +416,7 @@ int verifyString(TREE * currfolder, TREE * root, char * path) {
     aux = false;
     auxname = 0;
 
-    for (int i = 0; i < index; ++i)
+    for (int i = 0; i < index; ++i) 
       if (command[i] == ' ') {
         aux = true;
         auxname++;
@@ -424,23 +424,23 @@ int verifyString(TREE * currfolder, TREE * root, char * path) {
 
     strcpy(newnameAUX, command);
 
-    if (auxname >= 2) {
+    if (auxname >= 2) { 
       newFolder = strtok(newnameAUX, " ");
       newFolder = strtok(NULL, " ");
       newname = strtok(command, " ");
       newname = strtok(NULL, " ");
-      newname = strtok(NULL, " ");
+      newname = strtok(NULL, " "); //newname is the name of the file or folder
       newname = removeLineBreak(newname);
     }
 
     if (aux && auxname < 2) {
       newFolder = strtok(command, " ");
-      newFolder = strtok(NULL, " ");
+      newFolder = strtok(NULL, " "); 
       newFolder = removeLineBreak(newFolder);
     }
 
-    command = splitString(command);
-    command = removeLineBreak(command);
+    command = splitString(command); //remove spaces
+    command = removeLineBreak(command); 
 
     if (!strcmp(command, "mkdir"))
       mkdir(currfolder, newFolder);
@@ -487,31 +487,31 @@ int verifyString(TREE * currfolder, TREE * root, char * path) {
   free(newname);
 }
 
-int main() {
-  TREE * root = rootCreate();
+int main() { 
+  TREE * root = rootCreate(); //create root
   char a[100];
   TREE * curr = root;
   char * path = (char * ) malloc(sizeof(a));
   strcpy(path, "/");
-  mkdir(curr, "Arquivos-e-Programas");
-  curr = cd(curr, "Arquivos-e-Programas", & path);
-  touch(curr, "Firefox");
-  touch(curr, "Chrome");
-  touch(curr, "Opera");
-  curr = cdprevious(curr, & path);
-  mkdir(curr, "Meus-Documentos");
-  curr = cd(curr, "Meus-Documentos", & path);
-  touch(curr, "apresentacao.ppt");
-  touch(curr, "relatorio.doc");
-  mkdir(curr, "fontes");
-  curr = cd(curr, "fontes", & path);
-  touch(curr, "main.c");
-  touch(curr, "main.h");
-  curr = cdprevious(curr, & path);
-  mkdir(curr, "imagens");
-  touch(curr, "7zip.exe");
-  touch(curr, "t2.rar");
-  curr = cdprevious(curr, & path);
+  mkdir(curr, "Arquivos-e-Programas"); //create folder 'Arquivos-e-Programas'
+  curr = cd(curr, "Arquivos-e-Programas", & path); //change directory to 'Arquivos-e-Programas'
+  touch(curr, "Firefox"); //create file 'Firefox'
+  touch(curr, "Chrome"); //create file 'Chrome'
+  touch(curr, "Opera"); //create file 'Opera'
+  curr = cdprevious(curr, & path); //return to root
+  mkdir(curr, "Meus-Documentos"); //create folder 'Meus-Documentos'
+  curr = cd(curr, "Meus-Documentos", & path); //change directory to 'Meus-Documentos'
+  touch(curr, "apresentacao.ppt"); //create file 'apresentacao.ppt'
+  touch(curr, "relatorio.doc"); //create file 'relatorio.doc'
+  mkdir(curr, "fontes"); //create folder 'fontes'
+  curr = cd(curr, "fontes", & path); //change directory to 'fontes'
+  touch(curr, "main.c"); //create file 'main.c'
+  touch(curr, "main.h"); //create file 'main.h'
+  curr = cdprevious(curr, & path); //return to root
+  mkdir(curr, "imagens"); //create folder 'imagens'
+  touch(curr, "7zip.exe"); //create file '7zip.exe'
+  touch(curr, "t2.rar"); //create file 't2.rar'
+  curr = cdprevious(curr, & path); //return to root
   verifyString(curr, root, path);
   return SUCCESS;
 }
