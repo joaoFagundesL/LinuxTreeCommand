@@ -1,10 +1,10 @@
-#include <stdio.h>
+#include <stdio.h> 
 
-#include <string.h>
+#include <string.h> // strlen, strcpy, strcmp
 
-#include <stdbool.h>
+#include <stdbool.h> 
 
-#include <stdlib.h>
+#include <stdlib.h> 
 
 #define ERROR 0 
 #define SUCCESS 1 
@@ -16,27 +16,28 @@ typedef struct TREE {
   struct TREE * parent; // pointer to the parent
 
   char * name; // name of the node
-  short quantity; // quantity of the node
+  short quantity; // quantity of files in the folder
   short type; // type of the node
 }
 TREE; 
 
+// Global variables: identify the type of the node
 const short FOLDER = 2; 
-const short FILE_ = 1;
+const short FILE_ = 1; 
 
 char * getString() { // get string from the user
   char * str;
   char a[100];
 
-  str = (char * ) malloc(sizeof(a));
-  if (!str)
+  str = (char * ) malloc(sizeof(a)); // allocate memory for the string
+  if (!str) // if there is no memory
     return ERROR;
 
   else fgets(str, 100, stdin);
   return str;
 }
 
-TREE * getnodetype(TREE * currfolder, char * name, short type) {
+TREE * getnodetype(TREE * currfolder, char * name, short type) { //if i should know the type of the node
   if (currfolder -> child) {
     TREE * currnode = currfolder -> child;
 
@@ -54,7 +55,7 @@ TREE * getnodetype(TREE * currfolder, char * name, short type) {
   } else return NULL;
 }
 
-TREE * getnode(TREE * currfolder, char * name) {
+TREE * getnode(TREE * currfolder, char * name) { // if i shouldn't know the type of the node 
   if (currfolder -> child) {
     TREE * currnode = currfolder -> child;
 
@@ -124,30 +125,34 @@ TREE * createFile(TREE * newFile, char * newFileName) { // create new file
   return newFile;
 }
 
+void setNode_touch(TREE * currnode, TREE * newFile) {
+  currnode -> next = newFile; 
+  newFile -> previous = currnode;
+  newFile -> parent = NULL;
+}
+
 int touch(TREE * currfolder, char * name) {
   if (name) {
     TREE * currnode;
-    if (!getnode(currfolder, name)) {
+    if (!getnode(currfolder, name)) { // if file not exist
 
       currfolder -> quantity++;
       TREE * newFile = (TREE * ) malloc(sizeof(TREE));
 
-      if (!newFile)
+      if (!newFile) // if memory allocation failed
         return ERROR;
 
-      if (!currfolder -> child) {
+      if (!currfolder -> child) { // if there is no child
         currfolder -> child = newFile;
         newFile -> previous = NULL;
         newFile -> parent = currfolder;
       } else {
         currnode = currfolder -> child;
 
-        while (currnode -> next)
+        while (currnode -> next) // find the last node
           currnode = currnode -> next;
 
-        currnode -> next = newFile;
-        newFile -> previous = currnode;
-        newFile -> parent = NULL;
+        setNode_touch(currnode, newFile); // it is gonna set the pointer of the currnode and newFile
       }
 
       char * newFileName = (char * ) malloc(sizeof(char));
@@ -160,66 +165,67 @@ int touch(TREE * currfolder, char * name) {
   }
 }
 
+
 void ls(TREE * currfolder) { // list all files and folders
   if (currfolder -> child == NULL) printf("empty\n");
   else {
     TREE * currnode = currfolder -> child;
 
-    while (currnode -> next) {
+    while (currnode -> next) { // print all files
       if (currnode -> type == FOLDER) printf("(D) %s %d items\n", currnode -> name, currnode -> quantity);
       else printf("(F) %s\n", currnode -> name);
-      currnode = currnode -> next;
+      currnode = currnode -> next; // go to the next
     }
     currnode -> type == FOLDER ? printf("(D) %s %d items\n", currnode -> name, currnode -> quantity) : printf("(F) %s\n", currnode -> name);
   }
 }
 
 void pwd(char * path) { // print current path
-  char * pointer;
-  pointer = path;
+  char * pointer; // pointer to the path
+  pointer = path; // set pointer to the path
 
-  while ( * pointer != '\0')
+  while ( * pointer != '\0') // print path
     printf("%c", * pointer++);
 }
 
 TREE * cd(TREE * currfolder, char * folder, char ** path) {
   char * slash;
   slash = (char * ) malloc(sizeof(char));
-  strcpy(slash, "/");
+  strcpy(slash, "/"); 
 
-  if (!slash)
+  if (!slash) 
     return ERROR;
 
-  if (folder) {
-    TREE * destinationFolder = getnodetype(currfolder, folder, FOLDER);
+  if (folder) { // if there is a folder name
+    TREE * destinationFolder = getnodetype(currfolder, folder, FOLDER); // get the folder
 
-    if (destinationFolder) {
+    if (destinationFolder) { // if folder exist
       strcat( * path, destinationFolder -> name);
       strcat( * path, slash);
       return destinationFolder;
-    } else {
+    } else { // if folder doesn't exist
       printf("'%s' doesn't exist\n", folder);
       return currfolder;
     }
   } else
-    return currfolder;
+    return currfolder; // if there is no folder name
 
-  return currfolder;
+  return currfolder; 
 
 }
 
 TREE * cdprevious(TREE * currfolder, char ** path) {
-  int pathlen = strlen( * path);
+  int pathlen = strlen( * path); 
   int namelen = strlen(currfolder -> name);
-  int len = pathlen - namelen;
+  int len = pathlen - namelen; // length of the path
 
   while (currfolder -> previous)
     currfolder = currfolder -> previous;
 
-  if (currfolder -> parent) {
+  if (currfolder -> parent) { // if there is a parent
     ( * path)[--len] = '\0';
     return currfolder -> parent;
-  } else return currfolder;
+  } else return currfolder; // if there is no parent
 }
 
 void freeNode(TREE * freeingNode) {
@@ -260,9 +266,9 @@ void removeNode(TREE * removingNode) {
 char * splitString(char * string) { // split string by ' '
   char delim[] = " ";
 
-  string = strtok(string, delim);
+  string = strtok(string, delim); 
 
-  while (!string) string = strtok(NULL, delim);
+  while (!string) string = strtok(NULL, delim); 
 
   return string;
 }
@@ -328,7 +334,7 @@ TREE * rootCreate() {
   return root;
 }
 
-void menu() { 
+void menu() { // print menu
   puts("mkdir -arg\tcreate directory");
   puts("rmdir -arg\tdelete directory");
   puts("touch -arg\tcreate a file");
@@ -365,9 +371,9 @@ int renamedir(TREE * curr, char * name, char * newname) { //rename a directory
 int renamefile(TREE * curr, char * name, char * newname) { //rename a file
   TREE * node = getnode(curr, name);
   int len = strlen(name);
-  if (!len) return ERROR;
+  if (!len) return ERROR; // if name is empty
 
-  if (!node) {
+  if (!node) { // if node doesn't exist
     puts("something went wrong");
     return ERROR;
   }
@@ -388,9 +394,9 @@ void reset() { //reset color
   printf("\033[0m");
 }
 
-int verifyString(TREE * currfolder, TREE * root, char * path) {
-  char a[100];
-  char * newFolder = (char * ) malloc(sizeof(a));
+int verifyString(TREE * currfolder, TREE * root, char * path) { 
+  char a[100]; 
+  char * newFolder = (char * ) malloc(sizeof(a)); 
   char * newname = (char * ) malloc(sizeof(a));
   char * newnameAUX = (char * ) malloc(sizeof(a));
   char * command = (char * ) malloc(sizeof(a));
@@ -416,7 +422,7 @@ int verifyString(TREE * currfolder, TREE * root, char * path) {
     aux = false;
     auxname = 0;
 
-    for (int i = 0; i < index; ++i) 
+    for (int i = 0; i < index; ++i)
       if (command[i] == ' ') {
         aux = true;
         auxname++;
