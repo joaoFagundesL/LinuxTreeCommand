@@ -41,14 +41,14 @@ TREE * getnodetype(TREE * currfolder, char * name, short type) { //if i should k
   if (currfolder -> child) {
     TREE * currnode = currfolder -> child;
 
-    while (currnode -> next) {
+    while (currnode -> next) { // go through the list of the nodes
       if (strcmp(name, currnode -> name) == 0 && currnode -> type == type)
-        return currnode;
+        return currnode; // if the node is found
 
       currnode = currnode -> next;
     }
 
-    if (strcmp(name, currnode -> name) == 0 && currnode -> type == type)
+    if (strcmp(name, currnode -> name) == 0 && currnode -> type == type) 
       return currnode;
 
     else return NULL;
@@ -172,11 +172,11 @@ void ls(TREE * currfolder) { // list all files and folders
     TREE * currnode = currfolder -> child;
 
     while (currnode -> next) { // print all files
-      if (currnode -> type == FOLDER) printf("(D) %s %d items\n", currnode -> name, currnode -> quantity);
+      if (currnode -> type == FOLDER) printf("(D) %s (%d items)\n", currnode -> name, currnode -> quantity);
       else printf("(F) %s\n", currnode -> name);
       currnode = currnode -> next; // go to the next
     }
-    currnode -> type == FOLDER ? printf("(D) %s %d items\n", currnode -> name, currnode -> quantity) : printf("(F) %s\n", currnode -> name);
+    currnode -> type == FOLDER ? printf("(D) %s (%d items)\n", currnode -> name, currnode -> quantity) : printf("(F) %s\n", currnode -> name);
   }
 }
 
