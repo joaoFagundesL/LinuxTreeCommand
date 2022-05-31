@@ -9,7 +9,7 @@
 #define ERROR 0 
 #define SUCCESS 1 
 
-typedef struct TREE { 
+typedef struct TREE {
   struct TREE * child; // pointer to the child
   struct TREE * previous; // pointer to the previous
   struct TREE * next; // pointer to the next
@@ -118,7 +118,7 @@ int mkdir(TREE * currfolder, char * new) {
 TREE * createFile(TREE * newFile, char * newFileName) { // create new file
   newFile -> name = newFileName;
   newFile -> type = FILE_;
-  newFile -> quantity = 0;
+  newFile -> quantity = 0; // quantity of files in the folder
   newFile -> next = NULL;
   newFile -> child = NULL;
 
@@ -278,7 +278,7 @@ char * removeLineBreak(char * string) {
 
   string[len - 1] == '\n' ? string[len - 1] = '\0' : string[len - 1];
 
-  return string;
+  return string; // return the string without '\n'
 }
 
 int rmdir(TREE * curr, char * str) {  // remove directory
@@ -518,6 +518,6 @@ int main() {
   touch(curr, "7zip.exe"); //create file '7zip.exe'
   touch(curr, "t2.rar"); //create file 't2.rar'
   curr = cdprevious(curr, & path); //return to root
-  verifyString(curr, root, path);
+  verifyString(curr, root, path); //verify and execute commands
   return SUCCESS;
 }
