@@ -410,7 +410,7 @@ int verifyString(TREE * currfolder, TREE * root, char * path) {
     green();
     printf("joao@joao:~");
     blue();
-    pwd(path);
+    pwd(path); // print current directory
     green();
     printf("$ ");
     reset();
@@ -483,9 +483,9 @@ int verifyString(TREE * currfolder, TREE * root, char * path) {
     else if (!strcmp(command, "help"))
       menu();
 
-    else if (!strcmp(command, "exit")) {
+    else if (!strcmp(command, "exit")) 
       exitProgram(command, root, path);
-    }
+
   }
   free(command);
   free(newnameAUX);
