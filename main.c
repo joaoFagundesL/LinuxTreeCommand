@@ -165,7 +165,6 @@ int touch(TREE * currfolder, char * name) {
   }
 }
 
-
 void ls(TREE * currfolder) { // list all files and folders
   if (currfolder -> child == NULL) printf("empty\n");
   else {
