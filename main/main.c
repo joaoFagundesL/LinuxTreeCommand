@@ -1,9 +1,6 @@
 #include <stdio.h> 
-
 #include <string.h> // strlen, strcpy, strcmp
-
 #include <stdbool.h> 
-
 #include <stdlib.h> 
 
 #define ERROR 0 
