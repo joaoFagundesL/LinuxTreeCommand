@@ -7,6 +7,12 @@
 *.obj
 *.elf
 
+#.vscode folder
+.vscode
+
+#bin folder
+bin/
+
 # Linker output
 *.ilk
 *.map
